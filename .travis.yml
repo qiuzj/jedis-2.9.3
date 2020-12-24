@@ -1,0 +1,32 @@
+dist: trusty
+sudo: required
+language: java
+jdk:
+  - openjdk6
+  - openjdk7
+  - oraclejdk8
+before_install:
+    - wget -O stunnel.tar.gz ftp://ftp.stunnel.org/stunnel/archive/5.x/stunnel-5.29.tar.gz
+    - tar -xvzf stunnel.tar.gz
+    - cd ./stunnel-5.29 && ./configure && make && sudo make install && cd ..
+install:
+  - echo "Downloading Maven 3.0";
+  - wget https://archive.apache.org/dist/maven/binaries/apache-maven-3.0-bin.zip || travis_terminate 1
+  - unzip -qq apache-maven-3.0-bin.zip || travis_terminate 1
+  - export M2_HOME=$PWD/apache-maven-3.0
+  - export PATH=$M2_HOME/bin:$PATH
+  - if [[ $JAVA_HOME = *java-6* ]]; then jdk_switcher use openjdk6; fi
+  - mvn -version
+  - mvn clean package install -DskipTests -Dgpg.skip
+  - make travis-install
+
+script:
+  - make test
+cache:
+  directories:
+    - $HOME/.m2
+addons:
+  hostname: jedis
+  apt:
+    packages:
+      - openjdk-6-jdk
