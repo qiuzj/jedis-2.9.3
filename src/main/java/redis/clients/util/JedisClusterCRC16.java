@@ -41,25 +41,25 @@ public final class JedisClusterCRC16 {
     // equivalent to getCRC16(key) % 16384
     return getCRC16(key) & (16384 - 1);
   }
-
+  // 对key计算CRC16值，再对16384取模，得到key对应的Slot位置
   public static int getSlot(byte[] key) {
-    int s = -1;
-    int e = -1;
-    boolean sFound = false;
+    int s = -1; // s表示start. 自定义分片key的起始位置
+    int e = -1; // e表示end. 自定义分片key的结束位置
+    boolean sFound = false; // 是否自定义分片key标志. 为true时表示有自定义的分片key
     for (int i = 0; i < key.length; i++) {
-      if (key[i] == '{' && !sFound) {
-        s = i;
-        sFound = true;
+      if (key[i] == '{' && !sFound) { // 分片key开始位置，如{keyName}中的{
+        s = i; // 保存起始符{的索引位置
+        sFound = true; // 有自定义分片key
       }
-      if (key[i] == '}' && sFound) {
-        e = i;
+      if (key[i] == '}' && sFound) { // 分片key结束位置
+        e = i; // 保存结束符}的索引位置
         break;
       }
+    } // 整个for循环，就是为了确认是否有自定义的分片key，有则保存其开始和结束位置
+    if (s > -1 && e > -1 && e != s + 1) { // 存在大括号{}，并且大括号内有内容
+      return getCRC16(key, s + 1, e) & (16384 - 1); // 截取大括号{}内的字符串来计算CRC
     }
-    if (s > -1 && e > -1 && e != s + 1) {
-      return getCRC16(key, s + 1, e) & (16384 - 1);
-    }
-    return getCRC16(key) & (16384 - 1);
+    return getCRC16(key) & (16384 - 1); // // 整个key字符串来计算CRC
   }
 
   /**
@@ -71,7 +71,7 @@ public final class JedisClusterCRC16 {
    */
   public static int getCRC16(byte[] bytes, int s, int e) {
     int crc = 0x0000;
-
+    // 使用bytes数组的[s,e)范围内的字节来计算crc
     for (int i = s; i < e; i++) {
       crc = ((crc << 8) ^ LOOKUP_TABLE[((crc >>> 8) ^ (bytes[i] & 0xFF)) & 0xFF]);
     }

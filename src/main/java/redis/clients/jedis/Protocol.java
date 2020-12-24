@@ -18,8 +18,8 @@ import redis.clients.util.SafeEncoder;
 
 public final class Protocol {
 
-  private static final String ASK_RESPONSE = "ASK";
-  private static final String MOVED_RESPONSE = "MOVED";
+  private static final String ASK_RESPONSE = "ASK"; // 仅本次转移，后续仍需要访问旧的节点。例如先访问A，遇到ASK之后访问一次B，后续还是照常访问A。
+  private static final String MOVED_RESPONSE = "MOVED"; // 永久转移，后续都访问新的节点。例如先访问A，遇到MOVED之后就一直访问B。
   private static final String CLUSTERDOWN_RESPONSE = "CLUSTERDOWN";
   private static final String BUSY_RESPONSE = "BUSY";
   private static final String NOSCRIPT_RESPONSE = "NOSCRIPT";
@@ -32,11 +32,11 @@ public final class Protocol {
 
   public static final String CHARSET = "UTF-8";
 
-  public static final byte DOLLAR_BYTE = '$';
-  public static final byte ASTERISK_BYTE = '*';
-  public static final byte PLUS_BYTE = '+';
-  public static final byte MINUS_BYTE = '-';
-  public static final byte COLON_BYTE = ':';
+  public static final byte DOLLAR_BYTE = '$'; // 批量回复（bulk reply）的第一个字节是 "$"，"$"后面表示字符串的长度（十进制）
+  public static final byte ASTERISK_BYTE = '*'; // 多条批量回复（multi bulk reply）的第一个字节是 "*", "*"后面是数组元素个数（十进制）
+  public static final byte PLUS_BYTE = '+'; // 状态回复（status reply）的第一个字节是 "+"，"+"后面是字符串内容
+  public static final byte MINUS_BYTE = '-'; // 错误回复（error reply）的第一个字节是 "-"，"-"后面是错误信息
+  public static final byte COLON_BYTE = ':'; // 整数回复（integer reply）的第一个字节是 ":"，":"是具体的整型值
 
   public static final String SENTINEL_MASTERS = "masters";
   public static final String SENTINEL_GET_MASTER_ADDR_BY_NAME = "get-master-addr-by-name";

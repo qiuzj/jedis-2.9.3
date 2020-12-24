@@ -21,7 +21,7 @@ public class BinaryJedisCluster implements BasicCommands, BinaryJedisClusterComm
 
   public static final short HASHSLOTS = 16384;
   protected static final int DEFAULT_TIMEOUT = 2000;
-  protected static final int DEFAULT_MAX_REDIRECTIONS = 5;
+  protected static final int DEFAULT_MAX_REDIRECTIONS = 5; // 默认最大重定向次数为5（ASK、MOVED）
 
   protected int maxAttempts;
 

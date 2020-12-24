@@ -75,7 +75,7 @@ public abstract class JedisClusterCommand<T> {
       }
     }
 
-    return runWithRetries(slot, this.maxAttempts, false, false);
+    return runWithRetries(slot, this.maxAttempts, false, false); // runWithRetries方法最多执行maxAttempts次
   }
 
   public T runWithAnyNode() {
@@ -91,7 +91,7 @@ public abstract class JedisClusterCommand<T> {
   }
 
   private T runWithRetries(final int slot, int attempts, boolean tryRandomNode, boolean asking) {
-    if (attempts <= 0) {
+    if (attempts <= 0) { // 重试次数用完了，则抛出异常不再重试
       throw new JedisClusterMaxRedirectionsException("Too many Cluster redirections?");
     }
 
@@ -114,7 +114,7 @@ public abstract class JedisClusterCommand<T> {
         }
       }
 
-      return execute(connection);
+      return execute(connection); // 在Protocol中处理5种响应，还有MOVED、ASK转移状态，可能抛出各种异常，如Redirection
 
     } catch (JedisNoReachableClusterNodeException jnrcne) {
       throw jnrcne;
@@ -132,7 +132,7 @@ public abstract class JedisClusterCommand<T> {
         this.connectionHandler.renewSlotCache();
       }
 
-      return runWithRetries(slot, attempts - 1, tryRandomNode, asking);
+      return runWithRetries(slot, attempts - 1, tryRandomNode, asking); // 连接异常时attempts减1
     } catch (JedisRedirectionException jre) {
       // if MOVED redirection occurred,
       if (jre instanceof JedisMovedDataException) {
@@ -153,7 +153,7 @@ public abstract class JedisClusterCommand<T> {
         throw new JedisClusterException(jre);
       }
 
-      return runWithRetries(slot, attempts - 1, false, asking);
+      return runWithRetries(slot, attempts - 1, false, asking); // 发生重定向（ASK、MOVED）时attempts减1
     } finally {
       releaseConnection(connection);
     }
